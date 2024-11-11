@@ -3,12 +3,15 @@ const xlsx = require("xlsx");
 
 (async () => {
 
-    const URL = "https://www.plazavea.com.pe/automotriz/motos";
+    //const URL = "https://www.plazavea.com.pe/automotriz/motos";
+    //const URL = "https://www.plazavea.com.pe/dormitorio";
+    const URL = "https://www.plazavea.com.pe/zapatos";
     const browser = await puppeteer.launch({ headless: false });
     const page = await browser.newPage();
     // vitrine__products__comingSoon
-    // Navigate the page to a URL
+    
     await page.goto(URL, { waitUntil: "networkidle2" });
+    await page.setViewport({width: 1080, height: 1024});
 
     let products = [];
 
@@ -45,13 +48,20 @@ const xlsx = require("xlsx");
 
         products = [...products, ...pageProducts];
 
-        await page.evaluate(() => {
+        const next = await page.evaluate(() => {
             const nextButton = document.querySelector(".pagination__item.page-control.next");
 
-            if (nextButton)
+            if (nextButton && !nextButton.classList.contains("disabled")) {
                 nextButton.click();
+                return true;
+            }
+            else{
+                return false;
+            }
 
         });
+
+        if (!next) break;
 
         await new Promise((resolve) => setTimeout(resolve, 500));
     }
